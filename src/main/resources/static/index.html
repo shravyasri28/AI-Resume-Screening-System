@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Resume Screening</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(88, 86, 214, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 700px;
+            background: rgba(30, 30, 47, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1);
+            margin: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 35px;
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            margin-top: 25px;
+            animation: slideIn 0.6s ease-out backwards;
+        }
+
+        .file-upload-wrapper:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .file-upload-wrapper:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #b8b8d1;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed rgba(102, 126, 234, 0.4);
+            border-radius: 12px;
+            padding: 10px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-input-container:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(102, 126, 234, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .file-input-container.has-file {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-icon {
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+            display: block;
+        }
+
+        .file-text {
+            color: #9a9ab8;
+            font-size: 0.85rem;
+        }
+
+        .file-name {
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 8px;
+            display: none;
+            font-size: 0.85rem;
+        }
+
+        .file-input-container.has-file .file-name {
+            display: block;
+        }
+
+        button {
+            margin-top: 35px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: linear-gradient(135deg, #4a4a6a 0%, #5a5a7a 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result {
+            margin-top: 35px;
+            padding: 30px;
+            background: rgba(20, 20, 35, 0.6);
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            animation: resultFadeIn 0.6s ease-out;
+        }
+
+        @keyframes resultFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .score-container {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .score-label {
+            color: #b8b8d1;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 1s ease-out;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .skills-section {
+            margin-top: 25px;
+        }
+
+        .skills-title {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skills-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            color: #d0d0e0;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            animation: listItemFade 0.4s ease-out backwards;
+        }
+
+        ul li:nth-child(1) { animation-delay: 0.1s; }
+        ul li:nth-child(2) { animation-delay: 0.15s; }
+        ul li:nth-child(3) { animation-delay: 0.2s; }
+        ul li:nth-child(4) { animation-delay: 0.25s; }
+        ul li:nth-child(5) { animation-delay: 0.3s; }
+
+        @keyframes listItemFade {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #matched li {
+            border-left-color: #48bb78;
+        }
+
+        #matched li:hover {
+            background: rgba(72, 187, 120, 0.1);
+            transform: translateX(5px);
+        }
+
+        #missing li {
+            border-left-color: #f56565;
+        }
+
+        #missing li:hover {
+            background: rgba(245, 101, 101, 0.1);
+            transform: translateX(5px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #b8b8d1;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🤖 AI Resume Screening</h2>
+
+    <div class="file-upload-wrapper">
+        <label>📄 Upload Resume</label>
+        <div class="file-input-container" id="resumeContainer">
+            <input type="file" id="resume" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this, 'resumeContainer')" />
+            <span class="file-icon">📤</span>
+            <span class="file-text">Click to upload or drag & drop</span>
+            <div class="file-name" id="resumeName"></div>
+        </div>
+    </div>
+
+    <div class="file-upload-wrapper">
+        <label>📋 Upload Job Description</label>
+        <div class="file-input-container" id="jdContainer">
+            <input type="file" id="jd" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this, 'jdContainer')" />
+            <span class="file-icon">📤</span>
+            <span class="file-text">Click to upload or drag & drop</span>
+            <div class="file-name" id="jdName"></div>
+        </div>
+    </div>
+
+    <button onclick="submitFiles()">Analyze Match</button>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing documents...</div>
+    </div>
+
+    <div class="result" id="result" style="display:none;">
+        <div class="score-container">
+            <div class="score-label">Match Score</div>
+            <div class="score-value" id="score">0%</div>
+            <div class="score-bar">
+                <div class="score-fill" id="scoreFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="skills-section">
+            <div class="skills-title">✅ Matched Keywords</div>
+            <ul id="matched"></ul>
+        </div>
+
+        <div class="skills-section">
+            <div class="skills-title">❌ Missing Keywords</div>
+            <ul id="missing"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleFileSelect(input, containerId) {
+        const container = document.getElementById(containerId);
+        const nameDisplay = container.querySelector('.file-name');
+        
+        if (input.files.length > 0) {
+            const fileName = input.files[0].name;
+            container.classList.add('has-file');
+            nameDisplay.textContent = `✓ ${fileName}`;
+        } else {
+            container.classList.remove('has-file');
+            nameDisplay.textContent = '';
+        }
+    }
+
+    function submitFiles() {
+        const resume = document.getElementById("resume").files[0];
+        const jd = document.getElementById("jd").files[0];
+
+        if (!resume || !jd) {
+            alert("Please upload both Resume and Job Description.");
+            return;
+        }
+
+        document.getElementById("loading").classList.add("active");
+        document.getElementById("result").style.display = "none";
+
+        const formData = new FormData();
+        formData.append("resume", resume);
+        formData.append("jd", jd);
+
+        fetch("/match", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("loading").classList.remove("active");
+            document.getElementById("result").style.display = "block";
+            
+            const scoreValue = data.matchScore.toFixed(2);
+            document.getElementById("score").innerText = scoreValue + "%";
+            document.getElementById("scoreFill").style.width = scoreValue + "%";
+
+            const matchedList = document.getElementById("matched");
+            matchedList.innerHTML = "";
+            data.matchedSkills.forEach(skill => {
+                matchedList.innerHTML += `<li>${skill}</li>`;
+            });
+
+            const missingList = document.getElementById("missing");
+            missingList.innerHTML = "";
+            data.missingSkills.forEach(skill => {
+                missingList.innerHTML += `<li>${skill}</li>`;
+            });
+        })
+        .catch(error => {
+            document.getElementById("loading").classList.remove("active");
+            alert("Error occurred while processing files.");
+            console.error(error);
+        });
+    }
+</script>
+
+</body>
+</html>
